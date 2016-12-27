@@ -1,5 +1,6 @@
 package test.demo;
 
+import android.animation.ObjectAnimator;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -10,21 +11,32 @@ import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.DrawableRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.request.target.NotificationTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
 
 import java.io.File;
+
+import jp.wasabeef.glide.transformations.BlurTransformation;
+import jp.wasabeef.glide.transformations.CropSquareTransformation;
+import jp.wasabeef.glide.transformations.GrayscaleTransformation;
+import jp.wasabeef.glide.transformations.gpu.BrightnessFilterTransformation;
+
 
 /**
  * <p/>
@@ -56,6 +68,10 @@ public class TestGlideActivity extends AppCompatActivity {
     private ImageView iv_9;
     private TextView tv_title10;
     private ImageView iv_10;
+    private TextView tv_title11;
+    private ImageView iv_11;
+    private TextView tv_title12;
+    private ImageView iv_12;
     private int NOTIFICATION_ID = 1;
     private NotificationTarget notificationTarget;
 
@@ -83,9 +99,14 @@ public class TestGlideActivity extends AppCompatActivity {
         iv_9 = (ImageView) findViewById(R.id.iv_9);
         tv_title10 = (TextView) findViewById(R.id.tv_title10);
         iv_10 = (ImageView) findViewById(R.id.iv_10);
+        tv_title11 = (TextView) findViewById(R.id.tv_title11);
+        iv_11 = (ImageView) findViewById(R.id.iv_11);
+        tv_title12 = (TextView) findViewById(R.id.tv_title12);
+        iv_12 = (ImageView) findViewById(R.id.iv_12);
         tv_title1.setText("加载网络地址资源");
         Glide.with(this)
                 .load("http://pic6.huitu.com/res/20130116/84481_20130116142820494200_1.jpg")
+                .animate(R.anim.zoom)
                 .placeholder(R.drawable.ic_launcher)
                 .error(R.mipmap.ic_launcher_round)
                 .priority(Priority.LOW)
@@ -139,6 +160,8 @@ public class TestGlideActivity extends AppCompatActivity {
         tv_title7.setText("加载本地视频");
         Glide.with(this)
                 .load(Uri.fromFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "V61221-145100.mp4")))
+                .asBitmap()
+                .transform(new CropSquareTransformation(this))
                 .placeholder(R.drawable.ic_pb_default)
                 .error(R.mipmap.ic_launcher_round)
                 .into(iv_7);
@@ -161,6 +184,7 @@ public class TestGlideActivity extends AppCompatActivity {
         Glide.with(this)
                 .load("http://pic6.huitu.com/res/20130116/84481_20130116142820494200_1.jpg")
                 .asBitmap()
+                .transform(new BrightnessFilterTransformation(this, 20))
                 .into(simpleTarget);
 
         tv_title10.setText("Glide 中的回调：ViewTargets自定义视图");
@@ -175,6 +199,7 @@ public class TestGlideActivity extends AppCompatActivity {
         };
         Glide.with(this)
                 .load("http://pic6.huitu.com/res/20130116/84481_20130116142820494200_1.jpg")
+                .bitmapTransform(new GrayscaleTransformation(this))
                 .into(viewTarget);
 
         final RemoteViews rv = new RemoteViews(getPackageName(), R.layout.item_notification);
@@ -211,5 +236,51 @@ public class TestGlideActivity extends AppCompatActivity {
                 .into(notificationTarget);
         FSAppWidgetProvider fsAppWidgetProvider = new FSAppWidgetProvider();
         fsAppWidgetProvider.pushWidgetUpdate(this, rv);
+
+        tv_title11.setText("查看常规异常日志记录");
+        RequestListener requestListener = new RequestListener<String, GlideDrawable>() {
+            @Override
+            public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                Toast.makeText(TestGlideActivity.this, "onException : " + e.toString(), Toast.LENGTH_SHORT).show();
+                System.out.println("TestGlideActivity.onException : " + e.toString());
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                Toast.makeText(TestGlideActivity.this, "onResourceReady", Toast.LENGTH_SHORT).show();
+                iv_10.setImageDrawable(resource.getCurrent());
+                return false;
+            }
+        };
+        Glide.with(getApplicationContext())
+                .load("http://www.sinaimg.cn/dy/slidenews/4_img/2016_51/704_2095729_594750.jpg")
+                .animate(animationObject)
+//                .listener(requestListener)
+                .bitmapTransform(new BlurTransformation(this, 10))
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .error(R.mipmap.ic_launcher_round)
+                .into(iv_11);
+
+        tv_title12.setText("自定义Glide的图像像素尺寸");
+//        String baseImageUrl = "http://u-jia.deyi.com/2016/12/21/471709051959e3c46fb118dcbab77079c0b56c6b_945x647.jpg";
+        String baseImageUrl = "http://u-jia.deyi.com/2016/12/21/1e06021b5d6c86fcb69a8041eec000e5aa280f48_640x426.jpg";
+        CustomImageSizeModel modelFutureStudio =
+                new CustomImageSizeModelFutureStudio(baseImageUrl);
+        Glide.with(getApplicationContext())
+                .using(new CustomImageSizeUrlLoader(getApplicationContext()))
+                .load(modelFutureStudio)
+                .into(iv_12);
     }
+
+    ViewPropertyAnimation.Animator animationObject = new ViewPropertyAnimation.Animator() {
+        @Override
+        public void animate(View view) {
+            view.setAlpha(0f);
+            ObjectAnimator fadeAnim = ObjectAnimator.ofFloat(view, "alpha", 0f, 1f);
+            fadeAnim.setDuration(2500);
+            fadeAnim.start();
+        }
+    };
 }

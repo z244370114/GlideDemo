@@ -25,7 +25,7 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.ViewHolder> {
         this.context = context;
     }
 
-    private String[] listData = new String[]{"RecyclerView", "test"};
+    private String[] listData = new String[]{"GlideTest", "GlideTransform"};
 
     @Override
     public TestAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -39,14 +39,15 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.ViewHolder> {
         holder.tv_title.setOnClickListener(v -> {
             switch (position) {
                 case 0:
-                    Intent intent = new Intent(context, TestRecyclerView.class);
+                    Intent intent = new Intent(context, TestGlideActivity.class);
                     context.startActivity(intent);
                     break;
                 case 1:
+                    Intent intent1 = new Intent(context,TestGlideTransformActivity.class);
+                    context.startActivity(intent1);
                     break;
             }
         });
-
     }
 
     @Override

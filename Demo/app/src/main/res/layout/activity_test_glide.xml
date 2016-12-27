@@ -114,5 +114,26 @@
             android:layout_height="wrap_content">
 
         </test.demo.FutureStudioView>
+
+        <TextView
+            android:id="@+id/tv_title11"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <ImageView
+            android:id="@+id/iv_11"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tv_title12"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <ImageView
+            android:id="@+id/iv_12"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp" />
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>
